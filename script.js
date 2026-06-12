@@ -1,4 +1,4 @@
-const apiKey = "b33476a00d17fc972446dc35583536a3";
+const apiKey = "DITT_API_KEY_HÄR";
 
 function fetchWeatherByCity(city) {
     if (city === "") {
