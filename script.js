@@ -1,4 +1,4 @@
-const apiKey = "DITT_API_KEY_HÄR";
+const apiKey = "b33476a00d17fc972446dc35583536a3";
 
 function fetchWeatherByCity(city) {
     if (city === "") {
@@ -13,6 +13,7 @@ function fetchWeatherByCity(city) {
         }
     }).done(function (data) {
         printWeather(data);
+        addToHistory(data);
     }).fail(function () {
         $("#current-weather-container").html("");
         
@@ -77,3 +78,63 @@ function saveHistory(history) {
     localStorage.weatherHistory = JSON.stringify(history);
 }
 
+function printHistory() {
+    const history = loadHistory();
+    
+    if (history.length == 0) {
+        $("#history-section").addClass("d-none");
+        return false;
+    }
+
+    $("#history-section").removeClass("d-none");
+    $("#history-container").html("");
+
+    for (let i = history.length - 1; i >= 0; i--) {
+        const weatherData = history[i];
+        
+        $("#history-container").append(`
+            <div class="weather-card d-flex align-items-center justify-content-between p-3 history-item" data-city="${weatherData.name}" style="cursor: pointer;">
+                <img src="http://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png" alt="Väder">
+                <h2 class="m-0">${weatherData.name}</h2>
+                <p class="m-0">${weatherData.main.temp.toFixed(1)} °C</p>
+                <p class="m-0">${weatherData.wind.speed} m/s</p>
+            </div>
+        `);
+    }
+}
+
+function addToHistory(newData) {
+    const history = loadHistory();
+    const cleanHistory = [];
+
+    history.forEach(function (item) {
+        if (item.name != newData.name) {
+            cleanHistory.push(item);
+        }
+    });
+
+    cleanHistory.push(newData);
+
+    if (cleanHistory.length > 5) {
+        cleanHistory.splice(0, 1);
+    }
+
+    saveHistory(cleanHistory);
+    printHistory();
+}
+
+$("#search-city").on("keypress", function (e) {
+    if (e.key == "Enter") {
+        const city = $("#search-city").val().trim();
+        fetchWeatherByCity(city);
+        $("#search-city").val("");
+    }
+});
+
+$(document).ready(function () {
+    new bootstrap.Popover($("#search-city")[0], {
+        trigger: "manual"
+    });
+
+    printHistory();
+});
