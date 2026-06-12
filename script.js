@@ -40,3 +40,40 @@ function printWeather(data) {
     $("#current-weather-container").append(weatherHtml);
 }
 
+function fetchWeatherByCoords(lat, lon) {
+    $.ajax({
+        url: "https://api.openweathermap.org/data/2.5/weather",
+        data: {
+            lat: lat,
+            lon: lon,
+            appid: apiKey,
+            units: "metric"
+        }
+    }).done(function (data) {
+        printWeather(data);
+        addToHistory(data);
+    });
+}
+
+$("#btn-location").on("click", function () {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            
+            fetchWeatherByCoords(lat, lon);
+        });
+    }
+});
+
+function loadHistory() {
+    if (localStorage.weatherHistory == undefined) {
+        return [];
+    }
+    return JSON.parse(localStorage.weatherHistory);
+}
+
+function saveHistory(history) {
+    localStorage.weatherHistory = JSON.stringify(history);
+}
+
